@@ -179,9 +179,12 @@ def snapshot_vizinhos():
 
 def vizinhos_ativos():
     """{ip: custo} dos enlaces ATIVOS. Usado no LSA e pela Parte 2 (flooding)."""
+    ativos = {}
     with lock_vizinhos:
-        return {ip: viz["custo"] for ip, viz in vizinhos.items() if viz["ativo"]}
-
+        for ip, viz in vizinhos.items():
+            if viz["ativo"]:
+                ativos[ip] = viz["custo"]
+    return ativos
 
 def vizinho_desativado(ip):
     with lock_vizinhos:
@@ -191,10 +194,16 @@ def vizinho_desativado(ip):
 
 def dados_para_hello():
     """(destinos que recebem HELLO, lista de todos os configurados para o corpo do HELLO)."""
-    with lock_vizinhos:
-        destinos = [ip for ip, viz in vizinhos.items() if not viz["desativado"]]
-        return destinos, list(vizinhos)
+    destinos = []
+    configurados = []
 
+    with lock_vizinhos:
+        for ip, viz in vizinhos.items():
+            configurados.append(ip)
+            if not viz["desativado"]:
+                destinos.append(ip)
+
+    return destinos, configurados
 
 def processar_hello(ip_origem, lista_origem):
     """Aplica um HELLO já com formato válido. Retorna o que aconteceu:

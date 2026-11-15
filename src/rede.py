@@ -194,7 +194,7 @@ def loop_hello():
     while not estado.encerrar.is_set():
         _seguro(enviar_hellos)
         estado.encerrar.wait(estado.INTERVALO_HELLO)   # sleep interrompível
-
+  
 
 # ==========================================================================
 # MONITOR DE ENLACES (timeout de 15s)
