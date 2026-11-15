@@ -1,7 +1,5 @@
 """
 estado.py - Estado compartilhado do roteador.
-
-É o ÚNICO módulo que a Parte 2 precisa importar para conversar com a Parte 1:
   - estruturas protegidas por Lock (vizinhos, tabela_rotas)
   - registrar_log(), enviar_pacote(), vizinhos_ativos(), substituir_tabela_rotas()
 
@@ -52,7 +50,7 @@ evento_lsa = threading.Event()   # "gere um LSA agora" (acorda a thread de LSA)
 lock_vizinhos = threading.Lock()
 vizinhos = {}
 
-# Tabela de rotas (preenchida pela Parte 2):
+# Tabela de rotas (preenchida pela Integracao):
 #   destino -> {"proximo_salto": ip, "custo": int}
 lock_rotas = threading.Lock()
 tabela_rotas = {}
@@ -181,7 +179,7 @@ def snapshot_vizinhos():
 
 
 def vizinhos_ativos():
-    """{ip: custo} dos enlaces ATIVOS. Usado no LSA e pela Parte 2 (flooding)."""
+    """{ip: custo} dos enlaces ATIVOS. Usado no LSA e pela Integracao (flooding)."""
     ativos = {}
     with lock_vizinhos:
         for ip, viz in vizinhos.items():

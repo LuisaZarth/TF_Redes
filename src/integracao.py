@@ -1,5 +1,5 @@
 """
-parte2.py - PONTO DE ENCAIXE com a Parte 2 (LSDB, flooding, expiração, Dijkstra).
+integracao.py - PONTO DE ENCAIXE com a Parte 2 (LSDB, flooding, expiração, Dijkstra).
 
 Liga a classe LSDB (lsdb.py) às funções da Parte 1, mantendo os nomes e
 assinaturas que a Parte 1 já chama.

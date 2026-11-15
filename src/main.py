@@ -4,7 +4,7 @@ main.py - Ponto de entrada.   Uso: python main.py <IP_DESTE_ROTEADOR>
 Ordem de inicialização:
   1. estado.inicializar -> guarda meu_ip e lê roteadores.txt
   2. estado.abrir_socket -> bind em 0.0.0.0:6000
-  3. parte2.iniciar     -> (Parte 2) threads de expiração etc.
+  3. integracao.iniciar     -> (Parte 2) threads de expiração etc.
   4. rede.iniciar_threads -> recepção, HELLO, monitor de enlaces, LSA
   5. cli.loop           -> a thread principal vira a CLI
 """
@@ -13,7 +13,7 @@ import sys
 
 import terminal
 import estado
-import parte2
+import integracao
 import rede
 
 
@@ -30,7 +30,7 @@ def main():
         sys.exit(1)
 
     estado.registrar_log("INICIO", estado.meu_ip, f"roteador iniciado na porta {estado.PORTA}")
-    parte2.iniciar()
+    integracao.iniciar()
     rede.iniciar_threads()
     try:
         terminal.loop()

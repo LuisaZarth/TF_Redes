@@ -16,7 +16,7 @@ import socket
 import threading
 
 import estado
-import parte2
+import integracao
 from estado import registrar_log
 
 BUFFER_RECV = 4096   # maior que 1200 para conseguir DETECTAR pacotes grandes
@@ -126,7 +126,7 @@ def tratar_lsa(msg, ip_remetente):
     if estado.vizinho_desativado(ip_remetente):
         return descartar("LSA de vizinho desativado manualmente", ip_remetente, msg)
     registrar_log("LSA_RX", ip_remetente, msg)
-    parte2.processar_lsa_recebido(msg, ip_remetente)     # <- Parte 2
+    integracao.processar_lsa_recebido(msg, ip_remetente)     # <- Parte 2
 
 
 # ----------------------------------------------------------------- DATA ----
@@ -221,7 +221,7 @@ def gerar_e_enviar_lsa():
     msg = f"#{estado.meu_ip};{seq}" + "".join(f"*{ip};{custo}" for ip, custo in ativos.items())
 
     registrar_log("LSA_LOCAL", estado.meu_ip, f"gerado seq={seq} com {len(ativos)} vizinho(s) ativo(s)")
-    parte2.registrar_lsa_local(msg)       # <- Parte 2 guarda o LSA local na LSDB
+    integracao.registrar_lsa_local(msg)       # <-  guarda o LSA local na LSDB
     for ip in ativos:
         estado.enviar_pacote(msg, ip)
 

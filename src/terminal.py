@@ -6,7 +6,7 @@ e, se a topologia local mudou, chama estado.solicitar_lsa().
 """
 
 import estado
-import parte2
+import integracao
 import rede
 from estado import registrar_log
 
@@ -18,8 +18,8 @@ AJUDA = """Comandos:
   add <ip> <custo>                       adiciona vizinho e grava roteadores.txt
   remover <ip>                           remove vizinho e grava roteadores.txt
   vizinhos                               mostra vizinhos e situação do enlace
-  lsdb                                   mostra a LSDB (Parte 2)
-  rotas                                  mostra a tabela de rotas (Parte 2)
+  lsdb                                   mostra a LSDB
+  rotas                                  mostra a tabela de rotas
   reenviar <origem> <vizinho> dup|antigo reenvia LSA guardado (teste do cenário F)
   ajuda | sair"""
 
@@ -143,11 +143,11 @@ def cmd_vizinhos(_resto):
 
 
 def cmd_lsdb(_resto):
-    parte2.mostrar_lsdb()
+    integracao.mostrar_lsdb()
 
 
 def cmd_rotas(_resto):
-    parte2.mostrar_rotas()
+    integracao.mostrar_rotas()
 
 
 def cmd_reenviar(resto):
@@ -155,7 +155,7 @@ def cmd_reenviar(resto):
     if (len(args) != 3 or not estado.ip_valido(args[0])
             or not estado.ip_valido(args[1]) or args[2] not in ("dup", "antigo")):
         return print("Uso: reenviar <ip_origem> <ip_vizinho> dup|antigo")
-    parte2.reenviar_lsa(args[0], args[1], args[2])
+    integracao.reenviar_lsa(args[0], args[1], args[2])
 
 
 def cmd_ajuda(_resto):
