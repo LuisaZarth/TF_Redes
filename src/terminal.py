@@ -20,6 +20,7 @@ AJUDA = """Comandos:
   vizinhos                               mostra vizinhos e situação do enlace
   lsdb                                   mostra a LSDB (Parte 2)
   rotas                                  mostra a tabela de rotas (Parte 2)
+  reenviar <origem> <vizinho> dup|antigo reenvia LSA guardado (teste do cenário F)
   ajuda | sair"""
 
 
@@ -149,6 +150,14 @@ def cmd_rotas(_resto):
     parte2.mostrar_rotas()
 
 
+def cmd_reenviar(resto):
+    args = resto.split()
+    if (len(args) != 3 or not estado.ip_valido(args[0])
+            or not estado.ip_valido(args[1]) or args[2] not in ("dup", "antigo")):
+        return print("Uso: reenviar <ip_origem> <ip_vizinho> dup|antigo")
+    parte2.reenviar_lsa(args[0], args[1], args[2])
+
+
 def cmd_ajuda(_resto):
     print(AJUDA)
 
@@ -161,6 +170,7 @@ COMANDOS = {
     "enviar": cmd_enviar, "desativar": cmd_desativar, "ativar": cmd_ativar,
     "custo": cmd_custo, "add": cmd_add, "remover": cmd_remover,
     "vizinhos": cmd_vizinhos, "lsdb": cmd_lsdb, "rotas": cmd_rotas,
+    "reenviar": cmd_reenviar,
     "ajuda": cmd_ajuda, "sair": cmd_sair,
 }
 

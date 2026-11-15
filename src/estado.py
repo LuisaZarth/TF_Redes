@@ -120,11 +120,14 @@ def inicializar(ip_proprio):
 
 
 def abrir_socket():
-    """UDP em 0.0.0.0:6000. Timeout de 1s para a thread de recepção
-    conseguir checar 'encerrar' periodicamente."""
+    """UDP em meu_ip:6000. Timeout de 1s para a thread de recepção
+    conseguir checar 'encerrar' periodicamente.
+    Bind no IP do roteador (e não em 0.0.0.0) por dois motivos:
+      - permite rodar vários roteadores na mesma máquina (127.0.0.1, .2, ...);
+      - garante que o IP de origem dos datagramas enviados é meu_ip."""
     global sock
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.bind(("0.0.0.0", PORTA))
+    s.bind((meu_ip, PORTA))
     s.settimeout(1.0)
     sock = s
 

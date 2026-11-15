@@ -1,13 +1,13 @@
 """
 parte2.py - PONTO DE ENCAIXE com a Parte 2 (LSDB, flooding, expiração, Dijkstra).
 
-Hoje contém apenas STUBS. A dupla substitui o corpo das funções abaixo,
-SEM mudar os nomes/assinaturas, e o resto do programa continua funcionando.
+Liga a classe LSDB (lsdb.py) às funções da Parte 1, mantendo os nomes e
+assinaturas que a Parte 1 já chama.
 
-Este módulo deve importar somente `estado` (nunca `rede`/`cli`) para não
-criar import circular. Para enviar pacotes use estado.enviar_pacote().
+Este módulo importa somente `estado` e `lsdb` (nunca `rede`/`terminal`) para
+não criar import circular.
 
-O que a Parte 2 pode usar da Parte 1:
+O que a Parte 2 usa da Parte 1:
   estado.meu_ip                       IP deste roteador
   estado.vizinhos_ativos()            {ip: custo} dos enlaces ATIVOS (flooding)
   estado.enviar_pacote(msg, ip)       envia UDP (já valida tamanho/quebra de linha)
@@ -16,38 +16,97 @@ O que a Parte 2 pode usar da Parte 1:
   estado.encerrar                     Event: termine suas threads quando estiver setado
 """
 
+import threading
+
 import estado
+from lsdb import LSDB
+
+_lsdb = None
+
+# Vizinhos ativos na última geração do LSA local. Serve para detectar
+# vizinhança NOVA e sincronizar a LSDB com ela (ver registrar_lsa_local).
+_ativos_anteriores = set()
 
 
+# --------------------------------------------------------------------------
+# Adaptadores: a LSDB espera estas assinaturas
+# --------------------------------------------------------------------------
+def _vizinhos_ativos():
+    return list(estado.vizinhos_ativos())          # só os IPs
+
+
+def _enviar(ip, msg):
+    estado.enviar_pacote(msg, ip)                  # ordem dos argumentos invertida
+
+
+def _log(tipo, origem=None, descricao=None):
+    estado.registrar_log(tipo, origem or "-", descricao or "")
+
+
+def _publicar_rotas(tabela):
+    """{destino: (custo, salto)} -> formato que a Parte 1 usa no DATA."""
+    estado.substituir_tabela_rotas(
+        {destino: {"proximo_salto": salto, "custo": custo}
+         for destino, (custo, salto) in tabela.items()})
+
+
+# --------------------------------------------------------------------------
+# Funções chamadas pela Parte 1 (nomes e assinaturas mantidos)
+# --------------------------------------------------------------------------
 def iniciar():
-    """Chamada uma vez pelo main.py, antes da CLI. Inicie aqui as threads da Parte 2
-    (ex.: expiração de LSAs de 30s). Use daemon=True e cheque estado.encerrar."""
-    estado.registrar_log("PARTE2", "-", "stub: iniciar() ainda não implementado")
+    """Chamada uma vez pelo main.py, antes da CLI: cria a LSDB e liga a
+    thread de expiração de LSAs (30 s)."""
+    global _lsdb
+    _lsdb = LSDB(estado.meu_ip, _vizinhos_ativos, _enviar, _log,
+                 publicar_rotas=_publicar_rotas)
+
+    def laco_expiracao():
+        # Usa o Event da Parte 1 para encerrar junto com o resto do programa.
+        while not estado.encerrar.wait(1):
+            try:
+                _lsdb.verificar_expiracao()
+            except Exception as erro:  # noqa: BLE001 - a thread não pode morrer
+                estado.registrar_log("ERRO", "expiracao", repr(erro))
+
+    threading.Thread(target=laco_expiracao, name="loop_expiracao",
+                     daemon=True).start()
+    estado.registrar_log("PARTE2", estado.meu_ip, "LSDB iniciada")
 
 
 def registrar_lsa_local(msg):
     """Chamada pela thread de LSA (Parte 1) toda vez que o LSA LOCAL é gerado,
-    ANTES de enviá-lo aos vizinhos. `msg` já é o pacote completo, ex.:
-    '#10.0.0.1;7*10.0.0.2;10'. Guarde-o na LSDB (o próprio roteador também
-    faz parte do grafo) e, se quiser, recalcule o Dijkstra."""
-    estado.registrar_log("PARTE2", "-", f"stub: registrar_lsa_local({msg})")
+    ANTES de enviá-lo aos vizinhos.
+
+    Também é aqui que detectamos vizinhança nova: quando um enlace sobe, a
+    Parte 1 pede um LSA imediato, e o vizinho aparece pela primeira vez em
+    vizinhos_ativos(). Para cada vizinho novo, enviamos a LSDB inteira."""
+    global _ativos_anteriores
+    _lsdb.lsa_local_gerado(msg)
+
+    ativos = set(estado.vizinhos_ativos())
+    novos = ativos - _ativos_anteriores
+    _ativos_anteriores = ativos
+    for ip in sorted(novos):
+        _lsdb.vizinho_estabelecido(ip)
 
 
 def processar_lsa_recebido(msg, ip_remetente):
     """Chamada pela thread de recepção (Parte 1) para cada LSA recebido.
-    Garantias da Parte 1: formato validado e remetente NÃO está desativado.
-    `ip_remetente` é o IP UDP de quem enviou (o vizinho que repassou).
-    A Parte 2 deve: comparar sequência, atualizar LSDB, fazer flooding aos
-    vizinhos ativos (exceto o remetente) e recalcular rotas.
-    Atenção: roda na thread de recepção; não bloqueie por muito tempo."""
-    estado.registrar_log("PARTE2", ip_remetente, "stub: processar_lsa_recebido não implementado")
+    A Parte 1 já validou o formato e descartou vizinho desativado; a LSDB
+    confere vizinho ativo, sequência, LSA próprio, faz flooding e recalcula."""
+    _lsdb.lsa_recebido(msg, ip_remetente)
+
+
+def reenviar_lsa(origem, vizinho, modo):
+    """Comando de teste do cenário F: modo 'dup' ou 'antigo'."""
+    return _lsdb.reenviar_lsa(origem, vizinho, modo)
 
 
 def mostrar_lsdb():
-    """Comando 'lsdb' da CLI: imprimir a LSDB."""
-    print("[stub] lsdb: Parte 2 ainda não implementada")
+    """Comando 'lsdb' da CLI."""
+    _lsdb.mostrar()
 
 
 def mostrar_rotas():
-    """Comando 'rotas' da CLI: imprimir a tabela de rotas."""
-    print("[stub] rotas: Parte 2 ainda não implementada")
+    """Comando 'rotas' da CLI."""
+    _lsdb.mostrar_rotas()
