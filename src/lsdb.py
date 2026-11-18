@@ -1,28 +1,6 @@
 """
-lsdb.py - Parte 2 do Trabalho Final de Fundamentos de Redes (PUCRS)
-Topologia e rotas: LSDB, flooding, expiração, Dijkstra e tabela de roteamento.
+lsdb.py - Topologia e rotas: LSDB, flooding, expiração, Dijkstra e tabela de roteamento.
 
-ETAPA 1: leitura/validação de LSA e decisão de aceitar ou descartar.
-ETAPA 2: flooding, sincronização com vizinho novo e reenvio de teste
-         (LSA duplicado/antigo, para o cenário F).
-ETAPA 3: expiração de LSAs remotos (30 s) e validação da sequência local.
-ETAPA 4: grafo, Dijkstra, tabela de roteamento e próximo salto.
-
-Como a Parte 1 se conecta a este arquivo:
-    lsdb = LSDB(meu_ip, vizinhos_ativos, enviar, log)
-    lsdb.iniciar()        # liga a thread de expiração
-onde vizinhos_ativos, enviar e log são funções da Parte 1:
-    vizinhos_ativos()            -> lista de IPs dos vizinhos ativos
-    enviar(ip, msg)              -> envia uma mensagem UDP para ip:6000
-    log(tipo, origem, descricao) -> registra um evento na tela e no arquivo
-
-E a Parte 1 chama:
-    lsdb.lsa_recebido(msg, ip_remetente)   quando chega um #
-    lsdb.lsa_local_gerado(lsa)             a cada LSA próprio gerado
-    lsdb.vizinho_estabelecido(ip)          quando uma vizinhança fecha
-    lsdb.proximo_salto(destino)            para encaminhar um DATA
-    lsdb.mostrar() / lsdb.mostrar_rotas()  comandos "lsdb" e "rotas"
-    lsdb.reenviar_lsa(origem, viz, modo)   comando de teste do cenário F
 """
 
 import heapq
@@ -36,7 +14,6 @@ import time
 # ---------------------------------------------------------------------------
 VALIDADE_LSA = 30          # LSA remoto expira 30 s após a última versão aceita
 INTERVALO_EXPIRACAO = 1    # de quanto em quanto tempo checamos a expiração
-
 
 # ---------------------------------------------------------------------------
 # Validação e montagem de LSA
@@ -69,7 +46,7 @@ def ler_lsa(msg):
     (None, None, None, motivo).
     """
     if not msg.startswith("#"):
-        return None, None, None, "não começa com #"
+        return None, None, None,
 
     blocos = msg[1:].split("*")
 
@@ -105,8 +82,7 @@ def ler_lsa(msg):
 
 
 def montar_lsa(origem, seq, enlaces):
-    """Monta o texto do LSA exatamente no formato do enunciado.
-    Usado na sincronização e no reenvio de teste."""
+    """Monta o texto do LSA. Usado na sincronização e no reenvio de teste."""
     partes = [f"#{origem};{seq}"]
     partes += [f"{viz};{custo}" for viz, custo in enlaces.items()]
     return "*".join(partes)
@@ -117,14 +93,6 @@ def montar_lsa(origem, seq, enlaces):
 # ---------------------------------------------------------------------------
 def montar_grafo(registros, meu_ip, ativos):
     """Constrói o grafo dirigido a partir da LSDB.
-
-    Regras do enunciado:
-    - Uma aresta A -> B só existe se A e B têm LSA válido na LSDB e os DOIS
-      reconhecem o enlace (A anuncia B e B anuncia A).
-    - O custo de A -> B é o custo que A anunciou (pode diferir de B -> A).
-    - Do meu roteador, só saio por vizinhos ATIVOS (o próximo salto tem que
-      ser sempre um vizinho ativo).
-
     Devolve {no: {vizinho: custo}}.
     """
     grafo = {no: {} for no in registros}
@@ -147,9 +115,6 @@ def dijkstra(grafo, origem):
       dist[no]   = custo total do menor caminho até o nó
       saltos[no] = conjunto de TODOS os primeiros saltos possíveis que levam
                    ao nó com esse custo mínimo (mais de um = empate)
-
-    Guardar todos os primeiros saltos empatados permite escolher um de
-    forma aleatória depois, como pede o enunciado.
     """
     dist = {origem: 0}
     saltos = {origem: set()}
@@ -187,19 +152,12 @@ class LSDB:
     def __init__(self, meu_ip, vizinhos_ativos, enviar, log,
                  publicar_rotas=None):
         self.meu_ip = meu_ip
-        self.vizinhos_ativos = vizinhos_ativos   # função da Parte 1
-        self.enviar = enviar                     # função da Parte 1
-        self.log = log                           # função da Parte 1
-        # Opcional: chamada com a tabela nova após cada Dijkstra, para a
-        # Parte 1 usar no encaminhamento de DATA.
+        self.vizinhos_ativos = vizinhos_ativos  
+        self.enviar = enviar                     
+        self.log = log                           
         #   publicar_rotas({destino: (custo_total, proximo_salto)})
         self.publicar_rotas = publicar_rotas
 
-        # A Parte 1 chama estas funções a partir de threads diferentes
-        # (receptor, timers), então todo o estado fica protegido por um lock.
-        # Regra de ouro: NUNCA chamar vizinhos_ativos() ou enviar() com este
-        # lock preso, para não haver deadlock com o lock da Parte 1.
-        # Primeiro consultamos/decidimos, depois soltamos e enviamos.
         self.lock = threading.RLock()
 
         # Registros da LSDB: a versão válida mais recente de cada roteador.
@@ -233,7 +191,7 @@ class LSDB:
 
     # ------------------------------------------------- LSA vindo da rede
     def lsa_recebido(self, msg, ip_remetente):
-        """Chamado pela Parte 1 quando chega um datagrama que começa com #.
+        """Chamado pela thread de recepção quando chega um datagrama que começa com #.
         ip_remetente é quem enviou o datagrama (pode não ser a origem).
         Devolve True se o LSA foi aceito, False se foi descartado."""
 
@@ -291,9 +249,7 @@ class LSDB:
 
     # ------------------------------------------------------ LSA local
     def lsa_local_gerado(self, lsa):
-        """Chamado pela Parte 1 sempre que ela gera o LSA deste roteador.
-        O LSA próprio também fica na LSDB, porque o Dijkstra precisa dele.
-        (O envio do LSA local aos vizinhos é feito pela Parte 1.)"""
+        """Chamado pela thread de LSA sempre que ela gera o LSA deste roteador."""
         origem, seq, enlaces, motivo = ler_lsa(lsa)
         if motivo or origem != self.meu_ip:
             self.log("ERRO_LSA_LOCAL", self.meu_ip, motivo or "origem diferente")
@@ -310,15 +266,13 @@ class LSDB:
             mudou = self._registrar(origem, seq, enlaces)
         # O primeiro LSA local conta como mudança (origem nova), então o
         # primeiro cálculo acontece logo após a criação do LSA local, com o
-        # que houver na LSDB, como pede o enunciado.
+        # que houver na LSDB.
         if mudou:
             self.recalcular()
 
     # ------------------------------------------ sincronização com vizinho
     def vizinho_estabelecido(self, ip):
-        """Chamado pela Parte 1 quando uma vizinhança fica ativa.
-        Envia ao novo vizinho TODOS os LSAs válidos da LSDB (inclusive o
-        nosso), para ele conhecer a topologia sem esperar os periódicos."""
+        """Chamado pela thread de LSA quando uma vizinhança fica ativa."""
         with self.lock:
             mensagens = [montar_lsa(origem, r["seq"], r["enlaces"])
                          for origem, r in self.registros.items()]
@@ -367,13 +321,7 @@ class LSDB:
 
     def verificar_expiracao(self):
         """Retira da LSDB todo LSA remoto sem versão nova aceita há mais de
-        30 s. Devolve True se algum saiu (a topologia mudou).
-
-        - O LSA LOCAL nunca expira: ele é renovado pela própria Parte 1.
-        - maior_seq NÃO é apagada: um LSA antigo daquela origem continua
-          sendo descartado mesmo depois da expiração.
-        - Duplicados e antigos não renovam o prazo, porque só _registrar
-          (chamado para LSAs aceitos) atualiza o campo "recebido"."""
+        30 s. Devolve True se algum saiu (a topologia mudou)."""
         agora = time.time()
         with self.lock:
             vencidos = [origem for origem, r in self.registros.items()
@@ -425,8 +373,7 @@ class LSDB:
             self._comparar_tabelas(self.tabela, nova)
             self.tabela = nova
 
-        # Fora do lock (regra de ouro): entrega a tabela à Parte 1.
-        if self.publicar_rotas:
+        if self.publicar_rotas: #Publica a tabela de rotas para o encaminhamento de DATA
             self.publicar_rotas(dict(nova))
 
     def _comparar_tabelas(self, antiga, nova):
@@ -453,8 +400,7 @@ class LSDB:
                 self.log("ROTA_ALTERADA", destino, " | ".join(mudancas))
 
     def proximo_salto(self, destino):
-        """Usado pela Parte 1 para encaminhar DATA. Devolve o IP do próximo
-        salto ou None se não houver rota."""
+        """Devolve o IP do próximo salto ou None se não houver rota."""
         with self.lock:
             rota = self.tabela.get(destino)
             return rota[1] if rota else None
@@ -481,8 +427,7 @@ class LSDB:
 
     # --------------------------------------------- comando "lsdb"
     def mostrar(self):
-        """Exibe a LSDB (separada da tabela de roteamento, como pede o
-        enunciado)."""
+        """Exibe a LSDB (separada da tabela de roteamento)."""
         agora = time.time()
         with self.lock:
             if not self.registros:
@@ -518,159 +463,3 @@ class LSDB:
                 print(f"{destino:<16} {'-':>11}  {'-':<16}  <- REMOVIDA "
                       f"(era {custo} via {salto})")
             print()
-
-
-# ---------------------------------------------------------------------------
-# Teste isolado (sem rede): roda com  python lsdb.py
-# ---------------------------------------------------------------------------
-if __name__ == "__main__":
-
-    def log_falso(tipo, origem=None, descricao=None):
-        print("  " + " | ".join(p for p in (tipo, origem, descricao) if p))
-
-    def enviar_falso(ip, msg):
-        print(f"    [ENVIARIA para {ip}] {msg}")
-
-    def silencioso(ip, msg):
-        pass
-
-    # =======================================================================
-    # Testes das etapas 1 a 3
-    # =======================================================================
-    ativos = ["10.0.0.2", "10.0.0.3"]
-
-    def vizinhos_ativos_falso():
-        return list(ativos)
-
-    lsdb = LSDB("10.0.0.1", vizinhos_ativos_falso, enviar_falso, log_falso)
-
-    def testar(titulo, msg, remetente):
-        print(f"\n> {titulo}\n  recebido de {remetente}: {msg}")
-        lsdb.lsa_recebido(msg, remetente)
-
-    print("=== ETAPA 1: aceitar ou descartar ===")
-    print("\n> LSA local gerado pela Parte 1")
-    lsdb.lsa_local_gerado("#10.0.0.1;1*10.0.0.2;10*10.0.0.3;5")
-
-    testar("LSA novo de vizinho ativo (faz flooding para o .3, não volta pro .2)",
-           "#10.0.0.2;7*10.0.0.1;10*10.0.0.4;3", "10.0.0.2")
-    testar("Mesmo LSA de novo (duplicado: sem flooding)",
-           "#10.0.0.2;7*10.0.0.1;10*10.0.0.4;3", "10.0.0.2")
-    testar("Sequência menor (antigo: sem flooding)",
-           "#10.0.0.2;5*10.0.0.1;10*10.0.0.4;3", "10.0.0.2")
-    testar("Renovação periódica: seq maior, mesmos enlaces (sem Dijkstra)",
-           "#10.0.0.2;8*10.0.0.1;10*10.0.0.4;3", "10.0.0.2")
-    testar("Custo alterado: topologia muda",
-           "#10.0.0.2;9*10.0.0.1;10*10.0.0.4;8", "10.0.0.2")
-    testar("LSA do .4 encaminhado pelo vizinho .3 (flooding só para o .2)",
-           "#10.0.0.4;1*10.0.0.2;3", "10.0.0.3")
-    testar("Remetente que não é vizinho ativo",
-           "#10.0.0.4;2*10.0.0.2;3", "10.0.0.9")
-    testar("LSA com o meu próprio IP de origem",
-           "#10.0.0.1;50*10.0.0.2;10", "10.0.0.2")
-    testar("Custo zero (inválido)",
-           "#10.0.0.5;1*10.0.0.3;0", "10.0.0.3")
-    testar("IP inválido",
-           "#10.0.0.300;1*10.0.0.3;4", "10.0.0.3")
-    testar("Sem sequência",
-           "#10.0.0.5*10.0.0.3;4", "10.0.0.3")
-
-    print("\n=== ETAPA 2: sincronização com vizinho novo ===")
-    print("\n> Vizinhança com 10.0.0.6 estabelecida: envia a LSDB inteira")
-    ativos.append("10.0.0.6")
-    lsdb.vizinho_estabelecido("10.0.0.6")
-
-    print("\n=== ETAPA 2: reenvio de teste (cenário F) ===")
-    print("\n> Reenviar ao .3 o LSA do .2 com a mesma sequência (duplicado)")
-    lsdb.reenviar_lsa("10.0.0.2", "10.0.0.3", "dup")
-    print("\n> Reenviar ao .3 o LSA do .2 com sequência menor (antigo)")
-    lsdb.reenviar_lsa("10.0.0.2", "10.0.0.3", "antigo")
-    print("\n> Reenviar LSA de origem que não está na LSDB")
-    lsdb.reenviar_lsa("10.0.0.8", "10.0.0.3", "dup")
-
-    print("\n=== ETAPA 3: sequência local não pode regredir ===")
-    print("\n> Parte 1 gera LSA local com seq 2 (avança: aceito)")
-    lsdb.lsa_local_gerado("#10.0.0.1;2*10.0.0.2;10*10.0.0.3;5*10.0.0.6;4")
-    print("\n> Parte 1 gera LSA local com seq 1 (menor: ignorado)")
-    lsdb.lsa_local_gerado("#10.0.0.1;1*10.0.0.2;10")
-
-    print("\n=== ETAPA 3: expiração ===")
-    print("(validade encurtada para 2 s só neste teste; no real são 30 s)")
-    lsdb.validade = 2
-
-    print("\n> Duplicado do .4 chegando: NÃO deve renovar o prazo")
-    lsdb.lsa_recebido("#10.0.0.4;1*10.0.0.2;3", "10.0.0.3")
-
-    print("\n> Esperando 2,5 s e verificando...")
-    time.sleep(2.5)
-    lsdb.verificar_expiracao()
-
-    print("\n> Depois da expiração, LSA antigo do .2 (seq 9) continua descartado")
-    lsdb.lsa_recebido("#10.0.0.2;9*10.0.0.1;10*10.0.0.4;8", "10.0.0.2")
-    print("\n> Mas uma versão nova do .2 (seq 10) é aceita e volta para a LSDB")
-    lsdb.lsa_recebido("#10.0.0.2;10*10.0.0.1;10", "10.0.0.2")
-
-    print("\n=== LSDB final (o LSA local nunca expira) ===")
-    lsdb.mostrar()
-
-    # =======================================================================
-    # ETAPA 4: Dijkstra numa topologia conhecida (confira no papel)
-    # =======================================================================
-    #
-    #   Eu sou R1 = 10.1.0.1. Custos anunciados em cada direção:
-    #
-    #        R1 --8--> R2      R2 --2--> R1     (assimétrico)
-    #        R1 --5--> R3      R3 --5--> R1
-    #        R3 --3--> R2      R2 --3--> R3
-    #        R2 --1--> R4      R4 --1--> R2
-    #        R3 --9--> R5      R5 --9--> R3
-    #        R5 --2--> R6      (R6 não tem LSA: aresta não pode ser usada)
-    #
-    #   Rotas esperadas a partir de R1 (com todos os LSAs na LSDB):
-    #     R2: custo 8, empate (direto 8  x  via R3: 5+3=8) -> .2 ou .3
-    #     R3: custo 5 via .3
-    #     R4: custo 9, herda o empate do R2 -> .2 ou .3
-    #     R5: custo 14 via .3
-    #     R6: sem rota
-    #
-    print("\n\n=== ETAPA 4: Dijkstra e tabela de roteamento ===")
-    R1, R2, R3, R4, R5, R6 = (f"10.1.0.{i}" for i in range(1, 7))
-    ativos2 = [R2, R3]
-    rede = LSDB(R1, lambda: list(ativos2), silencioso, log_falso)
-
-    print("\n> LSA local (primeiro cálculo, só me conheço)")
-    rede.lsa_local_gerado(f"#{R1};1*{R2};8*{R3};5")
-
-    print("\n> Chegam os LSAs da rede (cada um muda a topologia)")
-    for msg, de in [
-        (f"#{R2};1*{R1};2*{R3};3*{R4};1", R2),
-        (f"#{R3};1*{R1};5*{R2};3*{R5};9", R3),
-        (f"#{R4};1*{R2};1", R2),
-        (f"#{R5};1*{R3};9*{R6};2", R3),
-    ]:
-        print(f"\n  >> {msg}")
-        rede.lsa_recebido(msg, de)
-
-    print("\n> Comando 'rotas':")
-    rede.mostrar_rotas()
-
-    print("> Renovação periódica do R4 (mesmos enlaces): NÃO roda Dijkstra")
-    rede.lsa_recebido(f"#{R4};2*{R2};1", R2)
-
-    print("\n> R3 aumenta o custo para R2 (3 -> 30): empate desaparece")
-    rede.lsa_recebido(f"#{R3};2*{R1};5*{R2};30*{R5};9", R3)
-    rede.mostrar_rotas()
-
-    print("> R1 aumenta o custo para R2 (8 -> 20): agora R2 vale mais via R3?")
-    print("  (via R3: 5+30=35, direto: 20 -> continua direto, só muda o custo)")
-    rede.lsa_local_gerado(f"#{R1};2*{R2};20*{R3};5")
-    rede.mostrar_rotas()
-
-    print("> Vizinho R3 fica inativo (Parte 1 gera LSA local sem ele)")
-    ativos2.remove(R3)
-    rede.lsa_local_gerado(f"#{R1};3*{R2};20")
-    rede.mostrar_rotas()
-
-    print("> proximo_salto (usado pela Parte 1 no DATA):")
-    for destino in (R4, R5, R6):
-        print(f"  proximo_salto({destino}) = {rede.proximo_salto(destino)}")

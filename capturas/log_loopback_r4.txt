@@ -1,6 +1,6 @@
 ARQUIVO | roteadores.txt | 1 vizinho(s) carregado(s)
 INICIO | 127.0.0.4 | roteador iniciado na porta 6000
-PARTE2 | 127.0.0.4 | LSDB iniciada
+LSDB | 127.0.0.4 | LSDB iniciada
 HELLO_TX | 127.0.0.2 | @127.0.0.4*127.0.0.2
 LSA_LOCAL | 127.0.0.4 | gerado seq=1 com 0 vizinho(s) ativo(s)
 LSDB_ATUALIZADA | 127.0.0.4 | nova origem
@@ -582,7 +582,7 @@ HELLO_RX | 127.0.0.2 | HELLO válido
 FIM | 127.0.0.4 | roteador encerrado
 ARQUIVO | roteadores.txt | 1 vizinho(s) carregado(s)
 INICIO | 127.0.0.4 | roteador iniciado na porta 6000
-PARTE2 | 127.0.0.4 | LSDB iniciada
+LSDB | 127.0.0.4 | LSDB iniciada
 HELLO_TX | 127.0.0.2 | @127.0.0.4*127.0.0.2
 LSA_LOCAL | 127.0.0.4 | gerado seq=47 com 0 vizinho(s) ativo(s)
 LSDB_ATUALIZADA | 127.0.0.4 | nova origem

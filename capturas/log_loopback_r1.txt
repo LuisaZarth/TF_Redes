@@ -1,6 +1,6 @@
 ARQUIVO | roteadores.txt | 2 vizinho(s) carregado(s)
 INICIO | 127.0.0.1 | roteador iniciado na porta 6000
-PARTE2 | 127.0.0.1 | LSDB iniciada
+LSDB | 127.0.0.1 | LSDB iniciada
 HELLO_TX | 127.0.0.2 | @127.0.0.1*127.0.0.2*127.0.0.3
 HELLO_TX | 127.0.0.3 | @127.0.0.1*127.0.0.2*127.0.0.3
 LSA_LOCAL | 127.0.0.1 | gerado seq=1 com 0 vizinho(s) ativo(s)

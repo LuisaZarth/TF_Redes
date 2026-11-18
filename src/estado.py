@@ -1,12 +1,7 @@
 """
 estado.py - Estado compartilhado do roteador.
   - estruturas protegidas por Lock (vizinhos, tabela_rotas)
-  - registrar_log(), enviar_pacote(), vizinhos_ativos(), substituir_tabela_rotas()
 
-Regras de lock (para evitar deadlock):
-  - cada função pega UM lock, faz algo curto e solta;
-  - lock_log é "folha": pode ser pego por dentro de outro lock,
-    mas quem o segura nunca pega outro lock.
 """
 
 import ipaddress
@@ -50,7 +45,7 @@ evento_lsa = threading.Event()   # "gere um LSA agora" (acorda a thread de LSA)
 lock_vizinhos = threading.Lock()
 vizinhos = {}
 
-# Tabela de rotas (preenchida pela Integracao):
+# Tabela de rotas (preenchido pela LSDB):
 #   destino -> {"proximo_salto": ip, "custo": int}
 lock_rotas = threading.Lock()
 tabela_rotas = {}
@@ -299,7 +294,7 @@ def solicitar_lsa():
 
 
 # --------------------------------------------------------------------------
-# Tabela de rotas (escrita pela Parte 2, lida pela Parte 1 no encaminhamento)
+# Tabela de rotas
 # --------------------------------------------------------------------------
 def obter_rota(destino):
     """{"proximo_salto": ip, "custo": n} ou None se não houver rota."""
@@ -309,7 +304,6 @@ def obter_rota(destino):
 
 
 def substituir_tabela_rotas(nova_tabela):
-    """Para a Parte 2: troca a tabela inteira de forma atômica após rodar Dijkstra."""
     with lock_rotas:
         tabela_rotas.clear()
         tabela_rotas.update(nova_tabela)
@@ -339,7 +333,7 @@ def proximo_seq():
             _ultimo_seq = _ler_seq_do_disco()
         novo = _ultimo_seq + 1
         if novo > SEQ_MAX:
-            novo = 1   # DECISÃO: ao estourar o limite, volta a 1 (confirmar com o professor)
+            novo = 1 
             registrar_log("SEQ", "-", "limite 2147483647 atingido; voltando para 1")
         _gravar_atomico(ARQ_SEQ, str(novo))
         _ultimo_seq = novo
@@ -355,7 +349,7 @@ def proximo_id():
 
 
 # --------------------------------------------------------------------------
-# Envio UDP (único ponto de saída: Parte 1 e Parte 2 usam esta função)
+# Envio UDP
 # --------------------------------------------------------------------------
 _TIPOS_TX = {"@": "HELLO_TX", "#": "LSA_TX", "!": "DATA_TX"}
 

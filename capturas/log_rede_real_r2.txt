@@ -1,6 +1,6 @@
 ARQUIVO | roteadores.txt | 1 vizinho(s) carregado(s)
 INICIO | 192.168.59.214 | roteador iniciado na porta 6000
-PARTE2 | 192.168.59.214 | LSDB iniciada
+LSDB | 192.168.59.214 | LSDB iniciada
 HELLO_TX | 192.168.59.192 | @192.168.59.214*192.168.59.192
 LSA_LOCAL | 192.168.59.214 | gerado seq=1 com 0 vizinho(s) ativo(s)
 LSDB_ATUALIZADA | 192.168.59.214 | nova origem
@@ -43,7 +43,7 @@ HELLO_TX | 192.168.59.192 | @192.168.59.214*192.168.59.192
 FIM | 192.168.59.214 | roteador encerrado
 ARQUIVO | roteadores.txt | 1 vizinho(s) carregado(s)
 INICIO | 192.168.59.214 | roteador iniciado na porta 6000
-PARTE2 | 192.168.59.214 | LSDB iniciada
+LSDB | 192.168.59.214 | LSDB iniciada
 HELLO_TX | 192.168.59.192 | @192.168.59.214*192.168.59.192
 LSA_LOCAL | 192.168.59.214 | gerado seq=13 com 0 vizinho(s) ativo(s)
 LSDB_ATUALIZADA | 192.168.59.214 | nova origem
@@ -81,7 +81,7 @@ LSA_LOCAL | 192.168.59.214 | gerado seq=23 com 0 vizinho(s) ativo(s)
 FIM | 192.168.59.214 | roteador encerrado
 ARQUIVO | roteadores.txt | 1 vizinho(s) carregado(s)
 INICIO | 192.168.59.214 | roteador iniciado na porta 6000
-PARTE2 | 192.168.59.214 | LSDB iniciada
+LSDB | 192.168.59.214 | LSDB iniciada
 HELLO_TX | 192.168.59.192 | @192.168.59.214*192.168.59.192
 LSA_LOCAL | 192.168.59.214 | gerado seq=24 com 0 vizinho(s) ativo(s)
 LSDB_ATUALIZADA | 192.168.59.214 | nova origem
@@ -216,7 +216,7 @@ LSA_TX | 192.168.59.192 | #192.168.59.214;39*192.168.59.192;10
 FIM | 192.168.59.214 | roteador encerrado
 ARQUIVO | roteadores.txt | 1 vizinho(s) carregado(s)
 INICIO | 192.168.59.214 | roteador iniciado na porta 6000
-PARTE2 | 192.168.59.214 | LSDB iniciada
+LSDB | 192.168.59.214 | LSDB iniciada
 HELLO_TX | 192.168.59.192 | @192.168.59.214*192.168.59.192
 LSA_RX | 192.168.59.192 | #192.168.59.192;33*192.168.59.214;7
 LSA_DESCARTADO | 192.168.59.192 | remetente não é vizinho ativo
@@ -414,7 +414,7 @@ LSA_TX | 192.168.59.192 | #192.168.59.214;64*192.168.59.192;10
 FIM | 192.168.59.214 | roteador encerrado
 ARQUIVO | roteadores.txt | 1 vizinho(s) carregado(s)
 INICIO | 192.168.59.214 | roteador iniciado na porta 6000
-PARTE2 | 192.168.59.214 | LSDB iniciada
+LSDB | 192.168.59.214 | LSDB iniciada
 HELLO_TX | 192.168.59.192 | @192.168.59.214*192.168.59.192
 LSA_RX | 192.168.59.192 | #192.168.59.192;63*192.168.59.214;3
 LSA_DESCARTADO | 192.168.59.192 | remetente não é vizinho ativo
@@ -466,7 +466,7 @@ LSA_ACEITO | 192.168.59.192 | SEQ=67
 FIM | 192.168.59.214 | roteador encerrado
 ARQUIVO | roteadores.txt | 1 vizinho(s) carregado(s)
 INICIO | 192.168.59.214 | roteador iniciado na porta 6000
-PARTE2 | 192.168.59.214 | LSDB iniciada
+LSDB | 192.168.59.214 | LSDB iniciada
 HELLO_TX | 192.168.59.192 | @192.168.59.214*192.168.59.192
 LSA_LOCAL | 192.168.59.214 | gerado seq=70 com 0 vizinho(s) ativo(s)
 LSDB_ATUALIZADA | 192.168.59.214 | nova origem
@@ -558,7 +558,7 @@ HELLO_TX | 192.168.59.192 | @192.168.59.214*192.168.59.192
 FIM | 192.168.59.214 | roteador encerrado
 ARQUIVO | roteadores.txt | 1 vizinho(s) carregado(s)
 INICIO | 192.168.59.214 | roteador iniciado na porta 6000
-PARTE2 | 192.168.59.214 | LSDB iniciada
+LSDB | 192.168.59.214 | LSDB iniciada
 HELLO_TX | 192.168.59.192 | @192.168.59.214*192.168.59.192
 LSA_LOCAL | 192.168.59.214 | gerado seq=81 com 0 vizinho(s) ativo(s)
 LSDB_ATUALIZADA | 192.168.59.214 | nova origem
@@ -566,7 +566,7 @@ DIJKSTRA_EXECUTADO | 192.168.59.214 | 0 destino(s) alcançável(is)
 FIM | 192.168.59.214 | roteador encerrado
 ARQUIVO | roteadores.txt | 1 vizinho(s) carregado(s)
 INICIO | 192.168.59.214 | roteador iniciado na porta 6000
-PARTE2 | 192.168.59.214 | LSDB iniciada
+LSDB | 192.168.59.214 | LSDB iniciada
 HELLO_TX | 192.168.59.192 | @192.168.59.214*192.168.59.192
 LSA_RX | 192.168.59.192 | #192.168.59.192;79*192.168.59.214;7
 LSA_DESCARTADO | 192.168.59.192 | remetente não é vizinho ativo

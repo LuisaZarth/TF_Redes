@@ -1,12 +1,13 @@
 """
-main.py - Ponto de entrada.   Uso: python main.py <IP_DESTE_ROTEADOR>
+main.py
 
 Ordem de inicialização:
   1. estado.inicializar -> guarda meu_ip e lê roteadores.txt
   2. estado.abrir_socket -> bind em 0.0.0.0:6000
-  3. integracao.iniciar     -> (Parte 2) threads de expiração etc.
+  3. integracao.iniciar
   4. rede.iniciar_threads -> recepção, HELLO, monitor de enlaces, LSA
   5. cli.loop           -> a thread principal vira a CLI
+  
 """
 
 import sys

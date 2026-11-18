@@ -1,6 +1,6 @@
 ARQUIVO | roteadores.txt | não encontrado; iniciando sem vizinhos
 INICIO | 192.168.59.192 | roteador iniciado na porta 6000
-PARTE2 | 192.168.59.192 | LSDB iniciada
+LSDB | 192.168.59.192 | LSDB iniciada
 LSA_LOCAL | 192.168.59.192 | gerado seq=1 com 0 vizinho(s) ativo(s)
 LSDB_ATUALIZADA | 192.168.59.192 | nova origem
 DIJKSTRA_EXECUTADO | 192.168.59.192 | 0 destino(s) alcançável(is)
@@ -521,7 +521,7 @@ HELLO_RX | 192.168.59.214 | HELLO válido
 FIM | 192.168.59.192 | roteador encerrado
 ARQUIVO | roteadores.txt | 1 vizinho(s) carregado(s)
 INICIO | 192.168.59.192 | roteador iniciado na porta 6000
-PARTE2 | 192.168.59.192 | LSDB iniciada
+LSDB | 192.168.59.192 | LSDB iniciada
 HELLO_TX | 192.168.59.214 | @192.168.59.192*192.168.59.214
 LSA_LOCAL | 192.168.59.192 | gerado seq=77 com 0 vizinho(s) ativo(s)
 LSDB_ATUALIZADA | 192.168.59.192 | nova origem

@@ -6,10 +6,7 @@ Threads iniciadas por iniciar_threads():
   loop_hello    : a cada 5s envia HELLO aos vizinhos não desativados
   loop_monitor  : a cada 1s derruba enlaces sem HELLO há > 15s
   loop_lsa      : gera o LSA local a cada 10s OU quando acordada por evento_lsa
-
-Quem muda a topologia local (recepção, monitor, CLI) NÃO gera LSA diretamente:
-apenas chama estado.solicitar_lsa(), que acorda loop_lsa. Assim só uma thread
-incrementa o seq.txt e envia LSAs.
+  
 """
 
 import socket
@@ -126,8 +123,7 @@ def tratar_lsa(msg, ip_remetente):
     if estado.vizinho_desativado(ip_remetente):
         return descartar("LSA de vizinho desativado manualmente", ip_remetente, msg)
     registrar_log("LSA_RX", ip_remetente, msg)
-    integracao.processar_lsa_recebido(msg, ip_remetente)     # <- Parte 2
-
+    integracao.processar_lsa_recebido(msg, ip_remetente) 
 
 # ----------------------------------------------------------------- DATA ----
 def validar_data(msg):

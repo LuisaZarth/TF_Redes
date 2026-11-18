@@ -1,10 +1,7 @@
 """
 terminal.py - Interface de comandos (roda na thread principal).
 
-Cada comando valida os argumentos, chama uma operação atômica de `estado`
-e, se a topologia local mudou, chama estado.solicitar_lsa().
 """
-
 import estado
 import integracao
 import rede
