@@ -3,11 +3,11 @@ main.py
 
 Ordem de inicialização:
   1. estado.inicializar -> guarda meu_ip e lê roteadores.txt
-  2. estado.abrir_socket -> bind em 0.0.0.0:6000
+  2. estado.abrir_socket 
   3. integracao.iniciar
   4. rede.iniciar_threads -> recepção, HELLO, monitor de enlaces, LSA
   5. cli.loop           -> a thread principal vira a CLI
-  
+
 """
 
 import sys
