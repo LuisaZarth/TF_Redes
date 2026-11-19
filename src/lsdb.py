@@ -46,7 +46,7 @@ def ler_lsa(msg):
     (None, None, None, motivo).
     """
     if not msg.startswith("#"):
-        return None, None, None,
+        return None, None, None, "não começa com #"
 
     blocos = msg[1:].split("*")
 
